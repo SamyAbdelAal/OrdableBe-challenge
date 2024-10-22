@@ -1,30 +1,64 @@
 from rest_framework import serializers
-from .models import Product, Order, OrderItem
+from .models import Product, Order, OrderItem, Options, ProductOptions 
 
 class ProductSerializer(serializers.ModelSerializer):
+    options = serializers.SerializerMethodField()
     class Meta:
         model = Product
-        fields = ['id', 'name', 'description', 'price', 'options']
+        fields = ['id', 'name', 'description', 'price','image', 'options']
+    def get_options(self, obj):
+        return OptionsSerializer(obj.options_set.all(), many=True).data
+  
+class ItemOptionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductOptions
+        fields = (
+            'id',
+            'value',
+            'extra_price'
+        )
+
+
+class OptionsSerializer(serializers.ModelSerializer):
+    product_options = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Options
+        fields = (
+            'id',
+            'name',
+            'product_options'
+        )
+
+    def get_product_options(self, obj):
+        return ItemOptionsSerializer(obj.productoptions_set.all(), many=True).data
+
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    product = ProductSerializer()  
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())  # Expect only the ID
+
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'product', 'quantity', 'price_at_purchase']
+        fields = ['id', 'product', 'quantity', 'price_at_purchase', 'selected_options']
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True) 
 
     class Meta:
         model = Order
-        fields = ['id', 'customer_name', 'customer_email', 'created_at', 'status', 'items']
+        fields = ['id', 'customer_name', 'customer_email', 'created_at', 'status', 'items',]
 
     def create(self, validated_data):
+        print(validated_data)
         items_data = validated_data.pop('items')
         order = Order.objects.create(**validated_data)
-        for item_data in items_data:
-            OrderItem.objects.create(order=order, **item_data)
+        for item in items_data:
+            quantity = item['quantity']
+            selected_options = item.get('selected_options', {}) 
+            print(selected_options)
+            product = item['product']
+            OrderItem.objects.create(order=order,product=product,selected_options=selected_options,quantity=quantity,price_at_purchase=product.price)
         return order
 
     def update(self, instance, validated_data):
@@ -34,16 +68,16 @@ class OrderSerializer(serializers.ModelSerializer):
         instance.status = validated_data.get('status', instance.status)
         instance.save()
         if items_data is not None:
-            for item_data in items_data:
-                item_id = item_data.get('id')
+            for item in items_data:
+                item_id = item.get('id')
                 if item_id:
                     # Update existing item
                     item = OrderItem.objects.get(id=item_id, order=instance)
-                    item.quantity = item_data.get('quantity', item.quantity)
-                    item.price_at_purchase = item_data.get('price_at_purchase', item.price_at_purchase)
+                    item.quantity = item.get('quantity', item.quantity)
+                    item.price_at_purchase = item.get('price_at_purchase', item.price_at_purchase)
                     item.save()
                 else:
                     # Create new item
-                    OrderItem.objects.create(order=instance, **item_data)
+                    OrderItem.objects.create(order=instance, **item)
 
         return instance

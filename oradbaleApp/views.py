@@ -9,8 +9,10 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
 
     def get_permissions(self):
-        if self.action == 'list': 
+        print(self.action)
+        if self.action == 'list' or self.action == 'retrieve': 
             permission_classes = [AllowAny]
+        
         else:  
             permission_classes = [IsAdminUser]  
         return [permission() for permission in permission_classes]
@@ -18,7 +20,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-
+    permission_classes = [AllowAny]
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
