@@ -11,7 +11,7 @@ class Product(models.Model):
   
 class Options(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    name = models.CharField(max_length=50)  # size
+    name = models.CharField(max_length=50) 
 
     def __str__(self):
         return self.name
@@ -38,6 +38,9 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order {self.id} by {self.customer_name}"
+    
+    def get_total_order_value(self):
+        return sum(item.get_price_at_purchase() for item in self.items.all())
 
 class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -47,3 +50,6 @@ class OrderItem(models.Model):
     selected_options = models.JSONField(default=dict, null=True, blank=True)  
     def __str__(self):
         return f"{self.quantity} x {self.product.name} for Order {self.order.id}"
+
+    def get_price_at_purchase(self):
+        return self.price_at_purchase 

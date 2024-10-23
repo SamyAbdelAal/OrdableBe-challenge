@@ -35,7 +35,7 @@ class OptionsSerializer(serializers.ModelSerializer):
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())  # Expect only the ID
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())  
 
 
     class Meta:
@@ -56,9 +56,10 @@ class OrderSerializer(serializers.ModelSerializer):
         for item in items_data:
             quantity = item['quantity']
             selected_options = item.get('selected_options', {}) 
+            price_at_purchase = item['price_at_purchase']
             print(selected_options)
             product = item['product']
-            OrderItem.objects.create(order=order,product=product,selected_options=selected_options,quantity=quantity,price_at_purchase=product.price)
+            OrderItem.objects.create(order=order,product=product,selected_options=selected_options,quantity=quantity,price_at_purchase=price_at_purchase)
         return order
 
     def update(self, instance, validated_data):
@@ -71,13 +72,11 @@ class OrderSerializer(serializers.ModelSerializer):
             for item in items_data:
                 item_id = item.get('id')
                 if item_id:
-                    # Update existing item
                     item = OrderItem.objects.get(id=item_id, order=instance)
                     item.quantity = item.get('quantity', item.quantity)
                     item.price_at_purchase = item.get('price_at_purchase', item.price_at_purchase)
                     item.save()
                 else:
-                    # Create new item
                     OrderItem.objects.create(order=instance, **item)
 
         return instance
