@@ -1,0 +1,23 @@
+.ui.table {
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.ui.button.primary {
+  background-color: #2185d0 !important;
+  border-radius: 5px;
+}
+
+.ui.modal {
+  border-radius: 10px;
+}
+
+.ui.header h2 {
+  color: #333;
+  font-weight: 600;
+}
+
+.ui.segment {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}

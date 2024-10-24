@@ -1,0 +1,39 @@
+body {
+  background-color: #f0f4f8;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.Grid {
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+}
+
+.Segment {
+  border-radius: 10px !important;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+.ui.header h2 {
+  font-weight: 500;
+}
+
+.ui.form input {
+  font-size: 1.1em;
+}
+
+.ui.blue.button {
+  background-color: #1e90ff !important;
+  border-radius: 5px !important;
+  font-size: 1.1em !important;
+}
+
+.ui.message {
+  border-radius: 10px !important;
+}
+
+.ui.negative.message {
+  border-radius: 10px !important;
+  background-color: #ffefef !important;
+  color: #b22222 !important;
+}
