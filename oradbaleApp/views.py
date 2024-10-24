@@ -1,25 +1,29 @@
 from django.http import JsonResponse
+from django.contrib.auth.models import User
 from rest_framework import viewsets
 from rest_framework.permissions import IsAdminUser,AllowAny
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.response import Response
 from .models import Product, Order, OrderItem
-from .serializers import ProductSerializer, OrderSerializer
+from .serializers import UserSerializer, ProductSerializer, OrderSerializer
 from rest_framework.decorators import api_view
 from django.conf import settings
 from django.shortcuts import redirect
-
 import requests
+
+
+class CreateUserView(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
     def get_permissions(self):
-        print(self.action)
         if self.action == 'list' or self.action == 'retrieve': 
             permission_classes = [AllowAny]
-        
         else:  
             permission_classes = [IsAdminUser]  
         return [permission() for permission in permission_classes]
