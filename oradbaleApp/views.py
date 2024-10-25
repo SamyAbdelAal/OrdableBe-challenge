@@ -1,7 +1,8 @@
+from rest_framework.views import APIView
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 from rest_framework import viewsets
-from rest_framework.permissions import IsAdminUser,AllowAny
+from rest_framework.permissions import IsAdminUser,AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.response import Response
 from .models import Product, Order, OrderItem
@@ -9,8 +10,13 @@ from .serializers import UserSerializer, ProductSerializer, OrderSerializer
 from rest_framework.decorators import api_view
 from django.conf import settings
 from django.shortcuts import redirect
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import CustomTokenObtainPairSerializer
+
 import requests
 
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 class CreateUserView(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -28,19 +34,43 @@ class ProductViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAdminUser]  
         return [permission() for permission in permission_classes]
 
+class UserOrdersView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user_email = request.user.email
+        orders = Order.objects.filter(customer_email=user_email)
+        serializer = OrderSerializer(orders, many=True)
+        
+        return Response(serializer.data)
+
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = [AllowAny]
-    def create(self, request, *args, **kwargs):
+    def get_permissions(self):
+        print(self.action)
+        if self.action == 'create':
+            permission_classes = [AllowAny]
+        elif self.action == 'list' or self.action == 'retrieve': 
+            permission_classes = [IsAuthenticated]
+        else:  
+            permission_classes = [IsAdminUser]  
+        return [permission() for permission in permission_classes]
+    
+    def create(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(serializer.data)
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
+        user_email = request.user
+        is_admin = request.user.is_staff
+        if is_admin:
+            orders = Order.objects.all()
+        else:
+            orders = Order.objects.filter(customer_email=user_email, status='paid')
+        serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
@@ -56,7 +86,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         self.perform_update(serializer)
         return Response(serializer.data)
 
-    def destroy(self, request, *args, **kwargs):
+    def destroy(self):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response(status=204)
@@ -71,7 +101,7 @@ def get_payment_methods(request):
         'Authorization': f'Bearer {settings.MYFATOORAH_API_KEY}',
         'Content-Type': 'application/json'
     }
-
+    print(request.data)
     response = requests.post(f"{settings.MYFATOORAH_API_URL}/InitiatePayment", headers=headers, json=request.data)
     print(response)
     payment_methods = response.json()
@@ -105,7 +135,6 @@ def initiate_payment(request):
     try:
         response = requests.post(f"{settings.MYFATOORAH_API_URL}/ExecutePayment", json=payment_data, headers=headers)
         response_data = response.json()
-        print(response_data)
         if response.status_code == 200 and response_data.get("IsSuccess"):
             payment_url = response_data["Data"]["PaymentURL"]
             return Response({'payment_url': payment_url})
@@ -119,7 +148,6 @@ def initiate_payment(request):
 @permission_classes([AllowAny])
 def payment_success(request):
     payment_id = request.GET.get('paymentId')  
-    print(payment_id)
     verification_response = requests.post(
         f"{settings.MYFATOORAH_API_URL}/GetPaymentStatus",
         json={"Key": payment_id, "KeyType": "PaymentId"},
