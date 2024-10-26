@@ -1,3 +1,4 @@
+from django.http import QueryDict
 from rest_framework.views import APIView
 from django.http import JsonResponse
 from django.contrib.auth.models import User
@@ -37,15 +38,15 @@ class ProductViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
     
     def create(self, request, *args, **kwargs):
-        options = request.POST.get('options')
-        if isinstance(options, str):
-            try:
-                request.data['options'] =  json.loads(options)
-            except json.JSONDecodeError:
-                return Response({"error": "Invalid JSON format in options."}, status=400)
-        print(request.data['optionss'])
+        options = request.data.get('options')
+        data = {key: value[0] if len(value) == 1 else value for key, value in request.data.lists()}
+        options_data = json.loads(options)
+        data['options'] = options_data  # Replace with your actual options_data
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
 
-        return super().create(request, *args, **kwargs)
+        return Response(serializer.data)
 
 class UserOrdersView(APIView):
     permission_classes = [IsAuthenticated]

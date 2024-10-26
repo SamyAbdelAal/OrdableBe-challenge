@@ -88,28 +88,7 @@ const AdminDashboard = ({
       formData.append("price", newProduct.price);
       formData.append("description", newProduct.description);
       formData.append("image", newProduct.image);
-      formData.append(
-        "options",
-        JSON.stringify([
-          {
-            name: "d2",
-            product_options: [
-              {
-                value: "d2",
-                extra_price: "2",
-              },
-            ],
-          },
-        ])
-      );
-      console.log(
-        `🚀 ~ handleAddProduct ~ options:`,
-        JSON.stringify(options, null, 2)
-      );
-
-      for (let [key, value] of formData.entries()) {
-        console.log(key, value);
-      }
+      formData.append("options", JSON.stringify(options));
 
       createProduct(formData);
       setNewProduct({ name: "", price: 0, description: "", image: null });

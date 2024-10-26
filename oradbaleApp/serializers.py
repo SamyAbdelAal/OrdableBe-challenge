@@ -48,8 +48,9 @@ class ProductSerializer(serializers.ModelSerializer):
         options_data = validated_data.pop('options', [])
         product = Product.objects.create(**validated_data)
         for option_data in options_data:
+            product_options_data = option_data.pop('product_options', [])
             option_instance = Options.objects.create(product=product, **option_data)
-            for product_option in option_data.get('product_options', []):
+            for product_option in product_options_data:
                 ProductOptions.objects.create(options=option_instance, **product_option)
 
         return product
