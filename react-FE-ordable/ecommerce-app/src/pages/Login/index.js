@@ -12,7 +12,7 @@ import {
 import "./styles.css";
 import * as actions from "../../store/actions";
 import { connect } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = ({ login }) => {
   const navigate = useNavigate();
@@ -74,7 +74,7 @@ const Login = ({ login }) => {
           )}
         </Segment>
         <Message>
-          New to us? <a href="#">Sign Up</a>
+          New to us? <Link to="/signup">Sign Up</Link>
         </Message>
       </Grid.Column>
     </Grid>

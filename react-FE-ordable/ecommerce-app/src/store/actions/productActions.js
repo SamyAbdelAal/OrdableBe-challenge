@@ -1,5 +1,6 @@
 import baseUrl from "./api";
 import * as actionTypes from "./actionTypes";
+import { setAuthToken } from "./authActions";
 export const fetchProducts = () => {
   return (dispatch) => {
     dispatch({ type: actionTypes.FETCH_PRODUCTS_LOADING, payload: true });
@@ -9,6 +10,9 @@ export const fetchProducts = () => {
         dispatch({ type: actionTypes.FETCH_PRODUCTS, payload: response.data });
       })
       .catch((error) => {
+        if (error?.response?.status === 401) {
+          dispatch(setAuthToken());
+        }
         dispatch({ type: actionTypes.FETCH_PRODUCTS_ERROR, payload: error });
       });
   };
@@ -25,7 +29,6 @@ export const fetchProductDetail = (productID) => {
           type: actionTypes.FETCH_PRODUCT_DETAIL,
           payload: response.data,
         });
-        console.log(`🚀 ~ .then ~ response.data:`, response.data);
       })
       .catch((error) => {
         dispatch({
@@ -48,6 +51,9 @@ export const createProduct = (product) => {
         dispatch({ type: actionTypes.CREATE_PRODUCT, payload: response.data });
       })
       .catch((error) => {
+        if (error?.response?.status === 401) {
+          dispatch(setAuthToken());
+        }
         dispatch({ type: actionTypes.CREATE_PRODUCT_ERROR, payload: error });
       });
   };

@@ -8,7 +8,6 @@ import {
   Header,
   Modal,
   Form,
-  Dropdown,
   Message,
   Image,
 } from "semantic-ui-react";
@@ -16,6 +15,7 @@ import "./styles.css";
 import { connect } from "react-redux";
 import * as actions from "../../store/actions";
 import DragDrop from "../../components/Drag&Drop";
+
 const AdminDashboard = ({
   fetchOrders,
   fetchedOrders,
@@ -26,11 +26,18 @@ const AdminDashboard = ({
   updateOrder,
 }) => {
   const [orders, setOrders] = useState([]);
-  console.log(`🚀 ~ AdminDashboard ~ orders:`, orders);
   const [products, setProducts] = useState([]);
-  const [newProduct, setNewProduct] = useState({ name: "", price: 0 });
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    price: 0,
+    description: "",
+    image: null,
+  });
   const [modalOpen, setModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [options, setOptions] = useState([
+    { name: "", product_options: [{ value: "", extra_price: "" }] },
+  ]);
 
   useEffect(() => {
     fetchOrders();
@@ -44,6 +51,36 @@ const AdminDashboard = ({
     setProducts(fetchedProducts);
   }, [fetchedProducts]);
 
+  const handleOptionNameChange = (index, e) => {
+    const { value } = e.target;
+    const newOptions = [...options];
+    newOptions[index].name = value;
+    setOptions(newOptions);
+  };
+
+  const handleProductOptionChange = (optionIndex, valueIndex, e) => {
+    const { name, value } = e.target;
+    const newOptions = [...options];
+    newOptions[optionIndex].product_options[valueIndex][name] = value;
+    setOptions(newOptions);
+  };
+
+  const addOptionCategory = () => {
+    setOptions([
+      ...options,
+      { name: "", product_options: [{ value: "", extra_price: "" }] },
+    ]);
+  };
+
+  const addProductOption = (optionIndex) => {
+    const newOptions = [...options];
+    newOptions[optionIndex].product_options.push({
+      value: "",
+      extra_price: "",
+    });
+    setOptions(newOptions);
+  };
+
   const handleAddProduct = () => {
     if (newProduct.name && newProduct.price > 0 && newProduct.description) {
       const formData = new FormData();
@@ -51,12 +88,37 @@ const AdminDashboard = ({
       formData.append("price", newProduct.price);
       formData.append("description", newProduct.description);
       formData.append("image", newProduct.image);
-      setProducts([...products, newProduct]);
+      formData.append(
+        "options",
+        JSON.stringify([
+          {
+            name: "d2",
+            product_options: [
+              {
+                value: "d2",
+                extra_price: "2",
+              },
+            ],
+          },
+        ])
+      );
+      console.log(
+        `🚀 ~ handleAddProduct ~ options:`,
+        JSON.stringify(options, null, 2)
+      );
+
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+
       createProduct(formData);
-      setNewProduct({ name: "", price: 0 });
+      setNewProduct({ name: "", price: 0, description: "", image: null });
+      setOptions([
+        { name: "", product_options: [{ value: "", extra_price: "" }] },
+      ]);
       setModalOpen(false);
     } else {
-      setErrorMessage("Product name and price must be valid.");
+      setErrorMessage("Product name, price, and description must be valid.");
     }
   };
 
@@ -68,9 +130,12 @@ const AdminDashboard = ({
   const handleAcceptOrder = (order) => {
     updateOrder({ ...order, status: "accepted" });
   };
+
   const setProductImage = (image) => {
     setNewProduct({ ...newProduct, image });
   };
+  console.log("newProduct", JSON.stringify(newProduct, null, 2));
+
   return (
     <Grid columns={2} padded>
       <Grid.Column width={10}>
@@ -84,7 +149,6 @@ const AdminDashboard = ({
                 <Table.HeaderCell>Customer</Table.HeaderCell>
                 <Table.HeaderCell>Total</Table.HeaderCell>
                 <Table.HeaderCell>Status</Table.HeaderCell>
-                <Table.HeaderCell>Paid</Table.HeaderCell>
                 <Table.HeaderCell>Actions</Table.HeaderCell>
               </Table.Row>
             </Table.Header>
@@ -93,7 +157,7 @@ const AdminDashboard = ({
               {orders.map((order) => (
                 <Table.Row key={order.id}>
                   <Table.Cell>{order.customer_name}</Table.Cell>
-                  <Table.Cell>${order.total}</Table.Cell>
+                  <Table.Cell>{order.total_order_value} KWD</Table.Cell>
                   <Table.Cell>{order.status}</Table.Cell>
                   <Table.Cell>
                     <Button
@@ -133,7 +197,7 @@ const AdminDashboard = ({
                     <Image src={product.image} size="tiny" />
                   </Table.Cell>
                   <Table.Cell>{product.name}</Table.Cell>
-                  <Table.Cell>${product.price}</Table.Cell>
+                  <Table.Cell>{product.price} KWD</Table.Cell>
                   <Table.Cell>
                     <Button
                       color="red"
@@ -192,6 +256,58 @@ const AdminDashboard = ({
                   }
                 />
                 <DragDrop setProductImage={setProductImage} />
+
+                <Header as="h4">Options</Header>
+                {options.map((option, optionIndex) => (
+                  <div key={optionIndex}>
+                    <Form.Input
+                      label="Option Category Name"
+                      placeholder="Category name"
+                      value={option.name}
+                      onChange={(e) => handleOptionNameChange(optionIndex, e)}
+                    />
+                    {option.product_options.map(
+                      (productOption, productOptionIndex) => (
+                        <Form.Group key={productOptionIndex}>
+                          <Form.Input
+                            placeholder="Option Value"
+                            name="value"
+                            value={productOption.value}
+                            onChange={(e) =>
+                              handleProductOptionChange(
+                                optionIndex,
+                                productOptionIndex,
+                                e
+                              )
+                            }
+                          />
+                          <Form.Input
+                            placeholder="Extra Price"
+                            name="extra_price"
+                            type="number"
+                            value={productOption.extra_price}
+                            onChange={(e) =>
+                              handleProductOptionChange(
+                                optionIndex,
+                                productOptionIndex,
+                                e
+                              )
+                            }
+                          />
+                        </Form.Group>
+                      )
+                    )}
+                    <Button
+                      type="button"
+                      onClick={() => addProductOption(optionIndex)}
+                    >
+                      Add Product Option
+                    </Button>
+                  </div>
+                ))}
+                <Button type="button" onClick={addOptionCategory}>
+                  Add Option Category
+                </Button>
               </Form>
               {errorMessage && <Message negative>{errorMessage}</Message>}
             </Modal.Content>

@@ -9,8 +9,6 @@ export const fetchPaymentMethods = () => {
       CurrencyIso: "KWD",
     })
       .then((response) => {
-        console.log(`🚀 ~ response.data:`, response.data);
-
         dispatch({
           type: actionTypes.FETCH_PAYMENT_METHODS,
           payload: response.data,

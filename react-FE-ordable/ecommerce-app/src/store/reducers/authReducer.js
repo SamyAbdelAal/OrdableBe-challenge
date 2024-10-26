@@ -2,6 +2,7 @@ import * as actionTypes from "../actions/actionTypes";
 
 const initialState = {
   authorized: false,
+  is_admin: false,
   loading: false,
   error: null,
 };
@@ -19,6 +20,7 @@ const authReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         authorized: action.payload,
+        is_admin: action.payload.is_admin,
       };
     case actionTypes.AUTH_LOGIN_FAILURE:
       return {

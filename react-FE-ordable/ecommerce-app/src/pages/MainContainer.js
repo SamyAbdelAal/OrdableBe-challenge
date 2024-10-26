@@ -40,21 +40,31 @@ const MainContainer = ({
           <Link to="/products/">
             <Menu.Item header>Products</Menu.Item>
           </Link>
-          <React.Fragment>
+          {!localStorage.getItem("accessToken") ? (
             <Menu.Menu position="right">
-              <CartComponent />
+              <Link to="/login">
+                <Menu.Item header>Login</Menu.Item>
+              </Link>
+              <Link to="/signup">
+                <Menu.Item header>Signup</Menu.Item>
+              </Link>
             </Menu.Menu>
-          </React.Fragment>
-          {!!authorized && (
-            <Menu.Item header onClick={() => logout(navigate)}>
-              Logout
-            </Menu.Item>
+          ) : (
+            <Menu.Menu position="right">
+              <Link to="/orders">
+                <Menu.Item>Orders</Menu.Item>
+              </Link>
+              <Menu.Item header onClick={() => logout(navigate)}>
+                Logout
+              </Menu.Item>
+            </Menu.Menu>
           )}
+          <Menu.Menu>
+            <CartComponent />
+          </Menu.Menu>
         </Container>
       </Menu>
-
       {children}
-
       <Segment
         inverted
         vertical

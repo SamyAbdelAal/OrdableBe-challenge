@@ -19,7 +19,7 @@ const OptionsCheckboxList = ({ options, onHandleOptionChange }) => {
       {options.map((option) => (
         <Form.Field key={option.id}>
           <Checkbox
-            label={`${option.value} (+$${option.extra_price})`}
+            label={`${option.value} (+${option.extra_price}) KWD`}
             value={option.id}
             checked={selectedOptions.includes(option.id)}
             onChange={handleChange}

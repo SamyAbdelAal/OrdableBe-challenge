@@ -6,7 +6,6 @@ export const createOrder = (order) => {
     baseUrl
       .post("/orders/", order)
       .then((response) => {
-        console.log(`🚀 ~ .then ~ response.data:`, response.data);
         dispatch(
           createPayment({
             order_id: response.data.id,
@@ -23,10 +22,13 @@ export const createOrder = (order) => {
 
 export const fetchOrders = () => {
   return (dispatch) => {
+    dispatch({
+      type: actionTypes.FETCH_ORDERS_LOADING,
+      payload: true,
+    });
     baseUrl
       .get("/orders/")
       .then((response) => {
-        console.log(`🚀 ~ .then ~ response:`, response);
         dispatch({ type: actionTypes.FETCH_ORDERS, payload: response.data });
       })
       .catch((error) => {

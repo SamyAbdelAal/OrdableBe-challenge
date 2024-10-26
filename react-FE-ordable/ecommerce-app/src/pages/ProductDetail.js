@@ -26,60 +26,25 @@ import {
 import * as actions from "../store/actions";
 import OptionsCheckboxList from "../components/OptionsCheckboxes";
 import QuantitySelector from "../components/QuntityComponent";
-const ProductDetail = ({ fetchProductDetail, product, addItem }) => {
+const ProductDetail = ({
+  fetchProductDetail,
+  product,
+  addItem,
+  listPordductId,
+}) => {
   const { productID } = useParams();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [formVisible, setFormVisible] = useState(false);
-  const [data, setData] = useState(product);
-  const [formData, setFormData] = useState({});
+
   const [selectedOptions, setSelectedOptions] = useState([]);
-  const [selectedOption, setSelectedOption] = useState(null);
+
   const [quantity, setQuantity] = useState(1);
-  const handleChange = (e, { value }) => {
-    setSelectedOption(value);
-  };
+
   const handleOptionChange = (optionIds, options) => {
     const selectedOptions = options.filter((opt) => optionIds.includes(opt.id));
     setSelectedOptions(selectedOptions);
   };
   useEffect(() => {
-    fetchProductDetail(productID);
+    fetchProductDetail(listPordductId || productID);
   }, [productID]);
-
-  useEffect(() => {
-    setData(product);
-  }, [product]);
-
-  const handleToggleForm = () => {
-    setFormVisible(!formVisible);
-  };
-
-  // const handleFetchItem = () => {
-  //   setLoading(true);
-  //   axios
-  //     .get(productDetailURL(productID))
-  //     .then((res) => {
-  //       setData(res.data);
-  //       setLoading(false);
-  //     })
-  //     .catch((err) => {
-  //       setError(err);
-  //       setLoading(false);
-  //     });
-  // };
-
-  const handleFormatData = (formData) => {
-    // convert {colour: 1, size: 2} to [1,2] - they're all variations
-    return Object.keys(formData).map((key) => {
-      return formData[key];
-    });
-  };
-
-  const handleAddToCart = (slug) => {
-    setLoading(true);
-    const variations = handleFormatData(formData);
-  };
 
   console.log(`🚀 ~ handleOptionChange ~ option:`, selectedOptions);
 
@@ -101,7 +66,7 @@ const ProductDetail = ({ fetchProductDetail, product, addItem }) => {
         <Image src={product.image} size="medium" rounded />
         <Header as="h4">{product.description}</Header>
         <Label as="h4">Price: ${product.price}</Label>
-        <Label as="h4">Total Price: ${calculateTotalPrice()}</Label>
+        <Label as="h4">Total Price: {calculateTotalPrice()} KWD</Label>
         <QuantitySelector
           initialQuantity={quantity}
           onQuantityChange={(newQuantity) => setQuantity(newQuantity)}
@@ -136,7 +101,7 @@ const ProductDetail = ({ fetchProductDetail, product, addItem }) => {
               {selectedOptions.map((opt) => {
                 return (
                   <li key={opt.id}>
-                    {opt.name}: {opt.value} (+${opt.extra_price})
+                    {opt.name}: {opt.value} (+{opt.extra_price} KWD)
                   </li>
                 );
               })}

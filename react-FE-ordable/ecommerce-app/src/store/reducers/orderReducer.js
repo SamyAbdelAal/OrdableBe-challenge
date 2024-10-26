@@ -21,6 +21,12 @@ const orderReducer = (state = initialState, action) => {
         loading: false,
         error: action.payload,
       };
+    case actionTypes.FETCH_ORDERS_LOADING:
+      return {
+        ...state,
+        loading: true,
+        error: null,
+      };
     case actionTypes.CREATE_ORDER:
       return {
         ...state,

@@ -11,31 +11,6 @@ import {
 import ProductList from "../components/ProductList";
 import { Link } from "react-router-dom";
 
-// Sample data for featured products
-const featuredProducts = [
-  {
-    id: 1,
-    name: "Product 1",
-    description: "This is a description for product 1.",
-    price: "20.00",
-    image: "http://localhost:8000/media/products/product1.webp",
-  },
-  {
-    id: 2,
-    name: "Product 2",
-    description: "This is a description for product 2.",
-    price: "10.00",
-    image: "http://localhost:8000/media/products/product2.webp",
-  },
-  {
-    id: 3,
-    name: "Product 3",
-    description: "This is a description for product 3.",
-    price: "15.00",
-    image: "http://localhost:8000/media/products/product3.webp",
-  },
-];
-
 const HomeScreen = () => {
   return (
     <Container
@@ -61,8 +36,6 @@ const HomeScreen = () => {
           Shop Now
         </Button>
       </Segment>
-
-      {/* Featured Products Section */}
 
       <Header as="h2" textAlign="center">
         Featured Products

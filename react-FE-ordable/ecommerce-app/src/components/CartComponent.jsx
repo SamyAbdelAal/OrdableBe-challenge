@@ -18,7 +18,6 @@ const CartComponent = ({ cart, removeItem }) => {
 
   return (
     <Menu inverted>
-      <Menu.Item name="home" content="Home" href="/" />
       <Menu.Menu position="right">
         <CartDropdown
           cartItems={cart}

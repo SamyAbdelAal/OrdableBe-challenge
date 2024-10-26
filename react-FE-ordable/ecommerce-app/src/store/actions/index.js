@@ -11,4 +11,4 @@ export { createOrder, fetchOrders, updateOrder } from "./orderActions";
 
 export { fetchPaymentMethods, createPayment } from "./paymentActions";
 
-export { login, logoutUser, setAuthToken } from "./authActions.js";
+export { login, logoutUser, setAuthToken, register } from "./authActions.js";

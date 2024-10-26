@@ -10,8 +10,10 @@ import Checkout from "./pages/Checkout";
 import FailurePayment from "./pages/FailurePayment";
 import SuccessPayment from "./pages/SuccessPayment";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import ProtectedRoute from "./components/ProtectedRoute.js";
 import AdminDashboard from "./pages/AdminDashboard";
+import OrderDisplay from "./pages/CustomerOrders.jsx";
 function App() {
   return (
     <Router>
@@ -19,12 +21,14 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products/" element={<Products />} />
+          <Route path="/orders/" element={<OrderDisplay />} />
           <Route path="/products/:productID" element={<ProductDetail />} />
           <Route path="/cart" element={<CartComponent />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/payment-success" element={<SuccessPayment />} />
           <Route path="/payment-failure" element={<FailurePayment />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
 
           <Route
             path="/admin"
