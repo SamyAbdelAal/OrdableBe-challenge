@@ -41,10 +41,22 @@ class ProductViewSet(viewsets.ModelViewSet):
         options = request.data.get('options')
         data = {key: value[0] if len(value) == 1 else value for key, value in request.data.lists()}
         options_data = json.loads(options)
-        data['options'] = options_data  # Replace with your actual options_data
+        data['options'] = options_data 
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
+
+        return Response(serializer.data)
+    def update(self, request, *args, **kwargs):
+        options = request.data.get('options')
+        data = {key: value[0] if len(value) == 1 else value for key, value in request.data.lists()}
+        options_data = json.loads(options)
+        data['options'] = options_data 
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
 
         return Response(serializer.data)
 

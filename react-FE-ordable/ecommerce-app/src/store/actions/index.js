@@ -4,6 +4,7 @@ export {
   fetchProducts,
   fetchProductDetail,
   createProduct,
+  updateProduct,
   deleteProduct,
 } from "./productActions";
 

@@ -54,6 +54,27 @@ class ProductSerializer(serializers.ModelSerializer):
                 ProductOptions.objects.create(options=option_instance, **product_option)
 
         return product
+    
+    def update(self, instance, validated_data):
+        options_data = validated_data.pop('options', [])
+        instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get('description', instance.description)
+        instance.price = validated_data.get('price', instance.price)
+        instance.image = validated_data.get('image', instance.image)
+        instance.save()
+        for option_data in options_data:
+            option_id = option_data.get('id')
+            if option_id:
+                option = Options.objects.get(id=option_id, product=instance)
+                option.name = option_data.get('name', option.name)
+                option.save()
+            else:
+                product_options_data = option_data.pop('product_options', [])
+                option_instance = Options.objects.create(product=instance, **option_data)
+                for product_option in product_options_data:
+                    ProductOptions.objects.create(options=option_instance, **product_option)
+
+        return instance
 
 
 class OrderItemSerializer(serializers.ModelSerializer):

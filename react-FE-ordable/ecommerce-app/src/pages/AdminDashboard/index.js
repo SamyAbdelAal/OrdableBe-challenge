@@ -24,6 +24,7 @@ const AdminDashboard = ({
   createProduct,
   deleteProduct,
   updateOrder,
+  updateProduct,
 }) => {
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
@@ -38,11 +39,14 @@ const AdminDashboard = ({
   const [options, setOptions] = useState([
     { name: "", product_options: [{ value: "", extra_price: "" }] },
   ]);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState(null);
 
   useEffect(() => {
     fetchOrders();
     fetchProducts();
   }, []);
+
   useEffect(() => {
     setOrders(fetchedOrders);
   }, [fetchedOrders]);
@@ -81,29 +85,55 @@ const AdminDashboard = ({
     setOptions(newOptions);
   };
 
-  const handleAddProduct = () => {
+  const handleAddOrUpdateProduct = () => {
     if (newProduct.name && newProduct.price > 0 && newProduct.description) {
       const formData = new FormData();
       formData.append("name", newProduct.name);
       formData.append("price", newProduct.price);
       formData.append("description", newProduct.description);
-      formData.append("image", newProduct.image);
+      if (typeof newProduct.image !== "string")
+        //so it doesn't append the image if it's not a file
+        formData.append("image", newProduct.image);
       formData.append("options", JSON.stringify(options));
 
-      createProduct(formData);
-      setNewProduct({ name: "", price: 0, description: "", image: null });
-      setOptions([
-        { name: "", product_options: [{ value: "", extra_price: "" }] },
-      ]);
-      setModalOpen(false);
+      if (isUpdating) {
+        updateProduct(selectedProductId, formData);
+      } else {
+        createProduct(formData);
+      }
+
+      resetProductForm(true);
     } else {
       setErrorMessage("Product name, price, and description must be valid.");
     }
   };
 
+  const resetProductForm = (submittig = false) => {
+    setNewProduct({ name: "", price: 0, description: "", image: null });
+    setOptions([
+      { name: "", product_options: [{ value: "", extra_price: "" }] },
+    ]);
+    setIsUpdating(false);
+    setSelectedProductId(null);
+    if (submittig) setModalOpen(false);
+  };
+
   const handleRemoveProduct = (id) => {
     setProducts(products.filter((product) => product.id !== id));
     deleteProduct(id);
+  };
+
+  const handleEditProduct = (product) => {
+    setNewProduct({
+      name: product.name,
+      price: product.price,
+      description: product.description,
+      image: product.image,
+    });
+    setOptions(product.options || []);
+    setSelectedProductId(product.id);
+    setIsUpdating(true);
+    setModalOpen(true);
   };
 
   const handleAcceptOrder = (order) => {
@@ -113,7 +143,6 @@ const AdminDashboard = ({
   const setProductImage = (image) => {
     setNewProduct({ ...newProduct, image });
   };
-  console.log("newProduct", JSON.stringify(newProduct, null, 2));
 
   return (
     <Grid columns={2} padded>
@@ -179,6 +208,13 @@ const AdminDashboard = ({
                   <Table.Cell>{product.price} KWD</Table.Cell>
                   <Table.Cell>
                     <Button
+                      color="blue"
+                      icon
+                      onClick={() => handleEditProduct(product)}
+                    >
+                      <Icon name="edit" /> Edit
+                    </Button>
+                    <Button
                       color="red"
                       icon
                       onClick={() => handleRemoveProduct(product.id)}
@@ -191,7 +227,13 @@ const AdminDashboard = ({
             </Table.Body>
           </Table>
 
-          <Button primary onClick={() => setModalOpen(true)}>
+          <Button
+            primary
+            onClick={() => {
+              setModalOpen(true);
+              resetProductForm();
+            }}
+          >
             Add Product
           </Button>
 
@@ -200,7 +242,9 @@ const AdminDashboard = ({
             onClose={() => setModalOpen(false)}
             size="tiny"
           >
-            <Modal.Header>Add a New Product</Modal.Header>
+            <Modal.Header>
+              {isUpdating ? "Update Product" : "Add a New Product"}
+            </Modal.Header>
             <Modal.Content>
               <Form>
                 <Form.Input
@@ -291,8 +335,8 @@ const AdminDashboard = ({
               {errorMessage && <Message negative>{errorMessage}</Message>}
             </Modal.Content>
             <Modal.Actions>
-              <Button onClick={handleAddProduct} primary>
-                Add Product
+              <Button onClick={handleAddOrUpdateProduct} primary>
+                {isUpdating ? "Update Product" : "Add Product"}
               </Button>
               <Button onClick={() => setModalOpen(false)}>Cancel</Button>
             </Modal.Actions>
@@ -314,6 +358,7 @@ const mapDispatchToProps = (dispatch) => ({
   createProduct: (product) => dispatch(actions.createProduct(product)),
   deleteProduct: (id) => dispatch(actions.deleteProduct(id)),
   updateOrder: (order) => dispatch(actions.updateOrder(order)),
+  updateProduct: (id, product) => dispatch(actions.updateProduct(id, product)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(AdminDashboard);
