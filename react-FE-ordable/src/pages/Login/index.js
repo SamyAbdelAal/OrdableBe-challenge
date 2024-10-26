@@ -49,7 +49,7 @@ const Login = ({ login }) => {
               fluid
               icon="user"
               iconPosition="left"
-              placeholder="Username"
+              placeholder="Username or email"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
