@@ -15,14 +15,13 @@ Welcome to the OrdableBe Challenge repository! This project is a mock e-commerce
 - Product catalog browsing
 - Shopping cart functionality
 - Order checkout process
-- Admin panel for managing products and orders
+- Admin panel for managing products and orders (can be accessed from http://localhost:3000/admin)
 
 ## Technologies Used
 
 - **Backend:** Django, Django REST Framework
 - **Frontend:** React, Semantic UI React
-- **Database:** SQLite (default), can be configured to use PostgreSQL or other databases
-- **Deployment:** Docker (optional, not covered in this README)
+- **Database:** SQLite (default)
 
 ## Installation
 
