@@ -22,39 +22,37 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
 
-
-
-class ProductSerializer(serializers.ModelSerializer):
-    options = serializers.SerializerMethodField()
-    class Meta:
-        model = Product
-        fields = ['id', 'name', 'description', 'price','image', 'options']
-    def get_options(self, obj):
-        return OptionsSerializer(obj.options_set.all(), many=True).data
-  
-class ItemOptionsSerializer(serializers.ModelSerializer):
+class ProductOptionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductOptions
-        fields = (
-            'id',
-            'value',
-            'extra_price'
-        )
+        fields = ['id', 'value', 'extra_price']
 
 
 class OptionsSerializer(serializers.ModelSerializer):
-    product_options = serializers.SerializerMethodField()
+    product_options = ProductOptionsSerializer(many=True)
 
     class Meta:
         model = Options
-        fields = (
-            'id',
-            'name',
-            'product_options'
-        )
+        fields =  ['id', 'name', 'product_options']
 
-    def get_product_options(self, obj):
-        return ItemOptionsSerializer(obj.productoptions_set.all(), many=True).data
+
+class ProductSerializer(serializers.ModelSerializer):
+    options = OptionsSerializer(many=True, )
+
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'description', 'price', 'image', 'options']
+   
+
+    def create(self, validated_data):
+        options_data = validated_data.pop('options', [])
+        product = Product.objects.create(**validated_data)
+        for option_data in options_data:
+            option_instance = Options.objects.create(product=product, **option_data)
+            for product_option in option_data.get('product_options', []):
+                ProductOptions.objects.create(options=option_instance, **product_option)
+
+        return product
 
 
 class OrderItemSerializer(serializers.ModelSerializer):

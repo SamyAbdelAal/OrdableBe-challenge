@@ -12,6 +12,8 @@ from django.conf import settings
 from django.shortcuts import redirect
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import CustomTokenObtainPairSerializer
+import json
+
 
 import requests
 
@@ -33,6 +35,17 @@ class ProductViewSet(viewsets.ModelViewSet):
         else:  
             permission_classes = [IsAdminUser]  
         return [permission() for permission in permission_classes]
+    
+    def create(self, request, *args, **kwargs):
+        options = request.POST.get('options')
+        if isinstance(options, str):
+            try:
+                request.data['options'] =  json.loads(options)
+            except json.JSONDecodeError:
+                return Response({"error": "Invalid JSON format in options."}, status=400)
+        print(request.data['optionss'])
+
+        return super().create(request, *args, **kwargs)
 
 class UserOrdersView(APIView):
     permission_classes = [IsAuthenticated]
