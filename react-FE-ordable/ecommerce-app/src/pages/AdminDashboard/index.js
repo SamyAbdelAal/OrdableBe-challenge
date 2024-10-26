@@ -15,6 +15,8 @@ import "./styles.css";
 import { connect } from "react-redux";
 import * as actions from "../../store/actions";
 import DragDrop from "../../components/Drag&Drop";
+import ProductsTable from "./ProductsTable";
+import OrdersTable from "./OrdersTable";
 
 const AdminDashboard = ({
   fetchOrders,
@@ -147,201 +149,118 @@ const AdminDashboard = ({
   return (
     <Grid columns={2} padded>
       <Grid.Column width={10}>
-        <Segment>
-          <Header as="h2" dividing>
-            Orders Management
-          </Header>
-          <Table celled striped>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell>Customer</Table.HeaderCell>
-                <Table.HeaderCell>Total</Table.HeaderCell>
-                <Table.HeaderCell>Status</Table.HeaderCell>
-                <Table.HeaderCell>Actions</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
-
-            <Table.Body>
-              {orders.map((order) => (
-                <Table.Row key={order.id}>
-                  <Table.Cell>{order.customer_name}</Table.Cell>
-                  <Table.Cell>{order.total_order_value} KWD</Table.Cell>
-                  <Table.Cell>{order.status}</Table.Cell>
-                  <Table.Cell>
-                    <Button
-                      color="green"
-                      disabled={order.status !== "paid"}
-                      onClick={() => handleAcceptOrder(order)}
-                    >
-                      Accept Order
-                    </Button>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table>
-        </Segment>
+        <OrdersTable orders={orders} handleAcceptOrder={handleAcceptOrder} />
       </Grid.Column>
 
       <Grid.Column width={6}>
-        <Segment>
-          <Header as="h2" dividing>
-            Product Management
-          </Header>
+        <ProductsTable
+          products={products}
+          handleEditProduct={handleEditProduct}
+          handleRemoveProduct={handleRemoveProduct}
+          setModalOpen={setModalOpen}
+          resetProductForm={resetProductForm}
+        />
 
-          <Table celled striped>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell>Product</Table.HeaderCell>
-                <Table.HeaderCell>Price</Table.HeaderCell>
-                <Table.HeaderCell>Actions</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)} size="tiny">
+          <Modal.Header>
+            {isUpdating ? "Update Product" : "Add a New Product"}
+          </Modal.Header>
+          <Modal.Content>
+            <Form>
+              <Form.Input
+                label="Product Name"
+                placeholder="Enter product name"
+                value={newProduct.name}
+                onChange={(e) =>
+                  setNewProduct({ ...newProduct, name: e.target.value })
+                }
+              />
+              <Form.Input
+                label="Description"
+                placeholder="Enter product description"
+                value={newProduct.description}
+                onChange={(e) =>
+                  setNewProduct({
+                    ...newProduct,
+                    description: e.target.value,
+                  })
+                }
+              />
+              <Form.Input
+                label="Product Price"
+                placeholder="Enter product price"
+                type="number"
+                value={newProduct.price}
+                onChange={(e) =>
+                  setNewProduct({
+                    ...newProduct,
+                    price: parseFloat(e.target.value),
+                  })
+                }
+              />
+              <DragDrop setProductImage={setProductImage} />
 
-            <Table.Body>
-              {products.map((product) => (
-                <Table.Row key={product.id}>
-                  <Table.Cell>
-                    <Image src={product.image} size="tiny" />
-                  </Table.Cell>
-                  <Table.Cell>{product.name}</Table.Cell>
-                  <Table.Cell>{product.price} KWD</Table.Cell>
-                  <Table.Cell>
-                    <Button
-                      color="blue"
-                      icon
-                      onClick={() => handleEditProduct(product)}
-                    >
-                      <Icon name="edit" /> Edit
-                    </Button>
-                    <Button
-                      color="red"
-                      icon
-                      onClick={() => handleRemoveProduct(product.id)}
-                    >
-                      <Icon name="trash" /> Remove
-                    </Button>
-                  </Table.Cell>
-                </Table.Row>
+              <Header as="h4">Options</Header>
+              {options.map((option, optionIndex) => (
+                <div key={optionIndex}>
+                  <Form.Input
+                    label="Option Category Name"
+                    placeholder="Category name"
+                    value={option.name}
+                    onChange={(e) => handleOptionNameChange(optionIndex, e)}
+                  />
+                  {option.product_options.map(
+                    (productOption, productOptionIndex) => (
+                      <Form.Group key={productOptionIndex}>
+                        <Form.Input
+                          placeholder="Option Value"
+                          name="value"
+                          value={productOption.value}
+                          onChange={(e) =>
+                            handleProductOptionChange(
+                              optionIndex,
+                              productOptionIndex,
+                              e
+                            )
+                          }
+                        />
+                        <Form.Input
+                          placeholder="Extra Price"
+                          name="extra_price"
+                          type="number"
+                          value={productOption.extra_price}
+                          onChange={(e) =>
+                            handleProductOptionChange(
+                              optionIndex,
+                              productOptionIndex,
+                              e
+                            )
+                          }
+                        />
+                      </Form.Group>
+                    )
+                  )}
+                  <Button
+                    type="button"
+                    onClick={() => addProductOption(optionIndex)}
+                  >
+                    Add Product Option
+                  </Button>
+                </div>
               ))}
-            </Table.Body>
-          </Table>
-
-          <Button
-            primary
-            onClick={() => {
-              setModalOpen(true);
-              resetProductForm();
-            }}
-          >
-            Add Product
-          </Button>
-
-          <Modal
-            open={modalOpen}
-            onClose={() => setModalOpen(false)}
-            size="tiny"
-          >
-            <Modal.Header>
-              {isUpdating ? "Update Product" : "Add a New Product"}
-            </Modal.Header>
-            <Modal.Content>
-              <Form>
-                <Form.Input
-                  label="Product Name"
-                  placeholder="Enter product name"
-                  value={newProduct.name}
-                  onChange={(e) =>
-                    setNewProduct({ ...newProduct, name: e.target.value })
-                  }
-                />
-                <Form.Input
-                  label="Description"
-                  placeholder="Enter product description"
-                  value={newProduct.description}
-                  onChange={(e) =>
-                    setNewProduct({
-                      ...newProduct,
-                      description: e.target.value,
-                    })
-                  }
-                />
-                <Form.Input
-                  label="Product Price"
-                  placeholder="Enter product price"
-                  type="number"
-                  value={newProduct.price}
-                  onChange={(e) =>
-                    setNewProduct({
-                      ...newProduct,
-                      price: parseFloat(e.target.value),
-                    })
-                  }
-                />
-                <DragDrop setProductImage={setProductImage} />
-
-                <Header as="h4">Options</Header>
-                {options.map((option, optionIndex) => (
-                  <div key={optionIndex}>
-                    <Form.Input
-                      label="Option Category Name"
-                      placeholder="Category name"
-                      value={option.name}
-                      onChange={(e) => handleOptionNameChange(optionIndex, e)}
-                    />
-                    {option.product_options.map(
-                      (productOption, productOptionIndex) => (
-                        <Form.Group key={productOptionIndex}>
-                          <Form.Input
-                            placeholder="Option Value"
-                            name="value"
-                            value={productOption.value}
-                            onChange={(e) =>
-                              handleProductOptionChange(
-                                optionIndex,
-                                productOptionIndex,
-                                e
-                              )
-                            }
-                          />
-                          <Form.Input
-                            placeholder="Extra Price"
-                            name="extra_price"
-                            type="number"
-                            value={productOption.extra_price}
-                            onChange={(e) =>
-                              handleProductOptionChange(
-                                optionIndex,
-                                productOptionIndex,
-                                e
-                              )
-                            }
-                          />
-                        </Form.Group>
-                      )
-                    )}
-                    <Button
-                      type="button"
-                      onClick={() => addProductOption(optionIndex)}
-                    >
-                      Add Product Option
-                    </Button>
-                  </div>
-                ))}
-                <Button type="button" onClick={addOptionCategory}>
-                  Add Option Category
-                </Button>
-              </Form>
-              {errorMessage && <Message negative>{errorMessage}</Message>}
-            </Modal.Content>
-            <Modal.Actions>
-              <Button onClick={handleAddOrUpdateProduct} primary>
-                {isUpdating ? "Update Product" : "Add Product"}
+              <Button type="button" onClick={addOptionCategory}>
+                Add Option Category
               </Button>
-              <Button onClick={() => setModalOpen(false)}>Cancel</Button>
-            </Modal.Actions>
-          </Modal>
-        </Segment>
+            </Form>
+            {errorMessage && <Message negative>{errorMessage}</Message>}
+          </Modal.Content>
+          <Modal.Actions>
+            <Button onClick={handleAddOrUpdateProduct} primary>
+              {isUpdating ? "Update Product" : "Add Product"}
+            </Button>
+            <Button onClick={() => setModalOpen(false)}>Cancel</Button>
+          </Modal.Actions>
+        </Modal>
       </Grid.Column>
     </Grid>
   );
