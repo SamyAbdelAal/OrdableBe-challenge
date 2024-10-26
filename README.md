@@ -15,7 +15,7 @@ Welcome to the OrdableBe Challenge repository! This project is a mock e-commerce
 - Product catalog browsing
 - Shopping cart functionality
 - Order checkout process
-- Admin panel for managing products and orders (can be accessed from http://localhost:3000/admin)
+- Admin panel for managing products and orders (can be accessed from http://localhost:3000/admin and can only be accessed by admin user/superusers from django eg. Username:admin password:admin)
 
 ## Technologies Used
 
