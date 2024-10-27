@@ -132,6 +132,7 @@ const AdminDashboard = ({
       description: product.description,
       image: product.image,
     });
+    console.log(`🚀 ~ handleEditProduct ~ product:`, product);
     setOptions(product.options || []);
     setSelectedProductId(product.id);
     setIsUpdating(true);

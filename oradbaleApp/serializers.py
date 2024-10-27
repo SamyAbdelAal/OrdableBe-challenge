@@ -62,6 +62,8 @@ class ProductSerializer(serializers.ModelSerializer):
         instance.price = validated_data.get('price', instance.price)
         instance.image = validated_data.get('image', instance.image)
         instance.save()
+        existing_option_ids = [option_data.get('id') for option_data in options_data if option_data.get('id')]
+        Options.objects.filter(product=instance).exclude(id__in=existing_option_ids).delete()
         for option_data in options_data:
             option_id = option_data.get('id')
             if option_id:
