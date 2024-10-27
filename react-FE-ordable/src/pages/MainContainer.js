@@ -99,13 +99,6 @@ const MainContainer = ({
                 <List.Item as="a">Link Four</List.Item>
               </List>
             </Grid.Column>
-            <Grid.Column width={7}>
-              <Header inverted as="h4" content="Footer Header" />
-              <p>
-                Extra space for a call to action inside the footer that could
-                help re-engage users.
-              </p>
-            </Grid.Column>
           </Grid>
 
           <Divider inverted section />
